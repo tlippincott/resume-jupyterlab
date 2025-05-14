@@ -10,13 +10,13 @@ def create_prompt(resume_string: str, jd_string: str, comp_name_string: str, com
     Creates a detailed prompt for AI-powered resume optimization based on a job description.
 
     This function generates a structured prompt that guides the AI to:
-    - Tailor the resume to match job requirements
+    - Tailor the resume bullet points and summary to match job requirements
     - Optimize for ATS systems
     - Provide actionable improvement suggestions
     - Format the output in clean Markdown
 
     Args:
-        resume_string (str): The input resume text
+        resume_string (str): The input resume bullet points
         jd_string (str): The target job description text
         comp_name_string (str): The company name where applying
         comp_info_string (str): The "About Us" section of the application; information about the company
@@ -27,9 +27,9 @@ def create_prompt(resume_string: str, jd_string: str, comp_name_string: str, com
     return f"""
 You are a professional resume optimization expert specializing in tailoring resumes to specific job descriptions. Your goal is to optimize my resume and provide actionable suggestions for improvement to align with the target role.
 
-Enhance a given resume to reflect a specific job description and company, optimizing for ATS and demonstrating alignment with the company's needs.
+Enhance given bullet points to reflect a specific job description and company, optimizing for ATS and demonstrating alignment with the company's needs.
 
-Given a resume as a string in markdown format, along with a job description, company name, and company information, your goal is to:
+Given resume bullet points as a string in markdown format, along with a job description, company name, and company information, your goal is to:
 
 1. Update the resume's bullet points to align with the job description by incorporating keywords and phrases naturally, using strong action verbs, and optimizing for Applicant Tracking Systems (ATS).
 2. Write a summary of 6-8 sentences that includes the company name and explains how the applicant’s skills fit the company's needs.
@@ -66,7 +66,7 @@ Given a resume as a string in markdown format, along with a job description, com
 
 # Output Format
 
-- **Resume Format**: The enhanced resume should be formatted in clean, readable Markdown.
+- **Bullet Point Format**: The enhanced bullet points should be formatted in clean, readable Markdown.
 - **Summary**: Write a concise, 6-8 sentence summary.
 - **Additional Suggestions**: Provide detailed recommendations in a separate section.
 - **Overall Structure**: Maintain original resume sections but enhance content as described.
@@ -74,30 +74,26 @@ Given a resume as a string in markdown format, along with a job description, com
 # Examples
 
 **Example Input:**
-- Resume in Markdown: "[Resume String Here]"
+- Bullet Points in Markdown: "[Bullet Points String Here]"
 - Job Description: "[Job Description Here]"
 - Company Name: "[Company Name Here]"
 - Company Info: "[Company Info Here]"
 
 **Example Output:**
 
-- **Enhanced Resume**:
+- **Enhanced Bullet Points and Summary**:
   ```markdown
-  # [Your Name]
-  - [Your Contact Information]
-
-  ## Summary
+  <!-- summary -->
   [Tailored summary using the company name and detailing alignment with job requirements.]
 
-  ## Experience
-  - **[Job Title]**
+  <!-- spins -->
     - Enhanced bullet points incorporating keywords and strong action verbs.
 
-  ## Skills
+  <!-- programmer -->
   - Enhanced skills list with relevant additions.
 
-  ## Education
-  - [Existing content]
+  <!-- analyst -->
+  - Enhanced skills list with relevant additions.
 
   ## Additional Suggestions
   - **Skills**: Suggest additional skills here.
@@ -153,18 +149,18 @@ def get_resume_response(prompt: str, my_api_key: str, model: str = "gpt-4o-mini"
 
 def process_resume(resume, jd_string, comp_name_string, comp_info_string):
     """
-    Process a resume file against a job description, a company name, and company information, to create an optimized resume version.
+    Process resume sections against a job description, a company name, and company information, to create optimized bullet points and a summary.
 
     Args:
-        resume (file): A file object containing the resume in markdown format
+        resume (file): A file object containing the bullet points in markdown format
         jd_string (str): The job description text to optimize the resume against
         comp_name_string (str): The company name where applying to use in the resume summary section
         comp_info_string (str): The "About Us" section of the application, also to be utilized in creating the resume summary section
 
     Returns:
         tuple: A tuple containing three elements:
-            - str: The optimized resume in markdown format (for display)
-            - str: The same optimized resume (for editing)
+            - str: The optimized resume sections in markdown format (for display)
+            - str: The same optimized resume sections (for editing)
             - str: Suggestions for improving the resume
     """
     # read resume
