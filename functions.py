@@ -1,113 +1,99 @@
 # functions for resume optimization
 import os
-from dotenv import load_dotenv
+import re
+import pathlib as Path
 from openai import OpenAI
-from markdown import markdown
-from weasyprint import HTML
 
-def create_prompt(resume_string: str, jd_string: str, comp_name_string: str, comp_info_string: str) -> str:
+from markdown import markdown
+from weasyprint import HTML, CSS
+
+def create_prompt(resume_string: str, jd_string: str, comp_name_string: str, comp_info_string: str, job_change_bool: bool) -> str:
     """
-    Creates a detailed prompt for AI-powered resume optimization based on a job description.
+    Creates a detailed prompt for AI-powered resume section optimization based on a job description, company name, and company information.
 
     This function generates a structured prompt that guides the AI to:
     - Tailor the resume bullet points and summary to match job requirements
     - Optimize for ATS systems
     - Provide actionable improvement suggestions
-    - Format the output in clean Markdown
+    - Format the output in clean Markdown to be utilized in a HTML template
 
     Args:
         resume_string (str): The input resume bullet points
         jd_string (str): The target job description text
         comp_name_string (str): The company name where applying
         comp_info_string (str): The "About Us" section of the application; information about the company
+        job_change_bool (bool): Value to indicate if the summary section should contain a statement about looking for a more customer-focused role (e.g. Helpdesk)
 
     Returns:
         str: A formatted prompt string containing instructions for resume optimization
     """
     return f"""
-You are a professional resume optimization expert specializing in tailoring resumes to specific job descriptions. Your goal is to optimize my resume and provide actionable suggestions for improvement to align with the target role.
+You are a professional resume optimization expert specializing in tailoring resume bullet points and summaries to specific job descriptions. Your goal is to optimize my bullet points and provide actionable suggestions for improvement to align with the target role.
 
-Enhance given bullet points to reflect a specific job description and company, optimizing for ATS and demonstrating alignment with the company's needs.
+Enhance the provided resume bullet points to align with the given job description and create a tailored resume summary. The summary should leverage the enhanced bullet points, the company name, and company information while underscoring how your skills, including 15 years of experience in the technology sector, can benefit the company. If the "change" section of the markdown file is "true," also state that you are looking for a role that is more customer-focused. The uploaded files will be `resume_string` (a string), `jd_string` (a string), `comp_name_string` (a string), and `comp_info_string` (a string).
 
-Given resume bullet points as a string in markdown format, along with a job description, company name, and company information, your goal is to:
-
-1. Update the resume's bullet points to align with the job description by incorporating keywords and phrases naturally, using strong action verbs, and optimizing for Applicant Tracking Systems (ATS).
-2. Write a summary of 6-8 sentences that includes the company name and explains how the applicant’s skills fit the company's needs.
-3. Provide actionable suggestions in three areas: additional skills, certifications or courses, and project ideas or experiences.
+- Incorporate details from the job description (`jd_string`) to refine the bullet points, ensuring they highlight relevant skills and experiences.
+- Craft a resume summary that emphasizes your alignment with the company’s needs and objectives, using the company name (`comp_name_string`) and company information (`comp_info_string`) effectively.
 
 # Steps
 
-1. **Analyze the Job Description**:
-   - Extract key skills, action verbs, and industry-specific jargon.
-   - Identify elements that are prioritized in the job description.
+1. **Analyze Job Description:** Identify key skills, experiences, and attributes the company is looking for from the `jd_string`.
+2. **Modify Bullet Points:** Align each bullet point with these key areas, emphasizing relevant experience and achievements from `resume_string`.
+3. **Write Resume Summary:**
+   - Begin with a brief introduction summarizing your experience in the technology world.
+   - Highlight how specific skills and achievements align with the company's goals.
+   - If the job change value ('job_change') is "True," include a statement about seeking a more customer-focused role.
+   - Conclude with the value you can bring to the company.
 
-2. **Update Resume Bullet Points**:
-   - Rewrite bullet points to naturally include keywords and phrases from the job description.
-   - Use strong action verbs to describe accomplishments and responsibilities.
+# Additional Suggestions
 
-3. **Craft the Summary**:
-   - Write a 6-8 sentence summary tailored to the company name and needs.
-   - Highlight how existing skills map to the job requirements and the company’s mission or values.
-
-4. **Suggest Improvements**:
-   - List additional technical or soft skills that would strengthen the profile.
-   - Recommend relevant certifications or courses to help bridge any gaps.
-   - Propose project ideas or experiences that align with the desired role.
-
-5. **Output the Enhanced Resume**:
-   - Format the updated resume in clean Markdown format.
-   - Include a section titled "Additional Suggestions" with detailed, actionable items for improvement.
+- **Additional Skills:** Identify and suggest any additional skills that could enhance your candidacy for roles in the target industry or position.
+- **Certifications or Courses:** Recommend certifications or courses that can further establish your expertise and relevance to the target job market.
+- **Project Ideas or Experiences:** Propose potential project ideas or experiences that can be pursued to gain or demonstrate relevant expertise.
 
 **Input:**
 - Resume in Markdown: {resume_string}
 - Job Description: {jd_string}
 - Company Name: {comp_name_string}
 - Company Info: {comp_info_string}
+- Customer Facing Role: {job_change_bool}
 
 # Output Format
 
-- **Bullet Point Format**: The enhanced bullet points should be formatted in clean, readable Markdown.
-- **Summary**: Write a concise, 6-8 sentence summary.
-- **Additional Suggestions**: Provide detailed recommendations in a separate section.
-- **Overall Structure**: Maintain original resume sections but enhance content as described.
+- Enhanced bullet points that directly relate to the job description (`jd_string`).
+- Each bullet point begins with "<li>" and ends with "</li>" and only contains text in the middle.
+- A resume summary consisting of 6-8 sentences, incorporating your experience, skills, alignment with the company’s objectives, and any additional notes about seeking a customer-focused role, using information from `comp_name_string` and `comp_info_string`.
+- Additional Suggestions section detailing actionable points on additional skills, certifications/courses, and project ideas/experiences.
+- Return the same updated markdown file as "enhanced-information.md" with the same number of sections and enhanced bullet points, summary, and additional suggestions placed under the correct headings. Ensure enhancements are made to the "spins", "programmer", and "analyst" sections with bullet points placed accordingly.
 
 # Examples
 
-**Example Input:**
-- Bullet Points in Markdown: "[Bullet Points String Here]"
-- Job Description: "[Job Description Here]"
-- Company Name: "[Company Name Here]"
-- Company Info: "[Company Info Here]"
+## Input
+- **Resume Bullet Points:** 
+  - Developed applications using Agile methodologies.
+  - Managed a software development team.
+- **Job Description:** Seeks project managers with experience in leading technology projects and optimizing team performance.
+- **Company Name:** TechVision
+- **Company Information:** TechVision is a leading innovator in cloud solutions and AI technologies.
+- **Job Change:** True
 
-**Example Output:**
+## Output
+- **Enhanced Bullet Points:**
+  <li>Successfully led cross-functional teams in developing key applications, utilizing Agile methodologies to enhance productivity and product quality.</li>
+  <li>Managed a high-performing software development team, achieving a 20% increase in project delivery efficiency</li>
 
-- **Enhanced Bullet Points and Summary**:
-  ```markdown
-  <!-- summary -->
-  [Tailored summary using the company name and detailing alignment with job requirements.]
+- **Resume Summary:**
+  With over 15 years in the technology industry, I have honed my ability to lead dynamic teams and drive innovation in fast-paced environments. My experience in managing technology projects aligns seamlessly with TechVision's aim to pioneer cloud solutions and AI advancements. By optimizing team performance and fostering collaboration, I have consistently delivered top-tier results. Additionally, I am seeking a role that is more customer-focused to leverage my strategic insights in enhancing client engagement. At TechVision, I plan to leverage these skills to spearhead projects that fuel growth and differentiation in the market. My strategic perspective and commitment to quality will support your mission of innovation. I am excited about the opportunity to contribute to TechVision's success and drive future achievements.
 
-  <!-- spins -->
-    - Enhanced bullet points incorporating keywords and strong action verbs.
-
-  <!-- programmer -->
-  - Enhanced skills list with relevant additions.
-
-  <!-- analyst -->
-  - Enhanced skills list with relevant additions.
-
-  ## Additional Suggestions
-  - **Skills**: Suggest additional skills here.
-  - **Certifications/Courses**: Recommend relevant certifications or courses.
-  - **Projects/Experiences**: Propose project ideas or experiences.
-
-  ```
-*Note: This structure is an example. Ensure to fully adapt the content relevant to the specific job and company.*
+- **Additional Suggestions:**
+  - **Additional Skills:** Leadership in collaborative project environments.
+  - **Certifications or Courses:** Agile Project Management Certification.
+  - **Project Ideas or Experiences:** Develop an AI-focused project that aligns with cloud services.
 
 # Notes
 
-- Leverage the company's mission and values to better align the summary with their needs.
-- Prioritize clarity and simplicity in language, ensuring adherence to recruitment trends and standards.
-- Customize suggestions to be highly relevant and practical for the candidate's career goals and current position.
+- Ensure that the enhanced bullet points and summary narrative maintain a formal and professional tone.
+- Customize the summary to reflect a strong understanding of the company’s mission and values.
 """
 
 def get_resume_response(prompt: str, my_api_key: str, model: str = "gpt-4o-mini", temperature: float = 0.7) -> str:
@@ -126,7 +112,7 @@ def get_resume_response(prompt: str, my_api_key: str, model: str = "gpt-4o-mini"
         temperature (float, optional): Controls randomness in the response. Defaults to 0.7
 
     Returns:
-        str: The AI-generated optimized resume and suggestions
+        str: The AI-generated optimized resume sections and suggestions
 
     Raises:
         OpenAIError: If there's an issue with the API call
@@ -147,7 +133,7 @@ def get_resume_response(prompt: str, my_api_key: str, model: str = "gpt-4o-mini"
     # Extract and return response
     return response.choices[0].message.content
 
-def process_resume(resume, jd_string, comp_name_string, comp_info_string):
+def process_resume(resume, jd_string, comp_name_string, comp_info_string, job_change):
     """
     Process resume sections against a job description, a company name, and company information, to create optimized bullet points and a summary.
 
@@ -156,6 +142,7 @@ def process_resume(resume, jd_string, comp_name_string, comp_info_string):
         jd_string (str): The job description text to optimize the resume against
         comp_name_string (str): The company name where applying to use in the resume summary section
         comp_info_string (str): The "About Us" section of the application, also to be utilized in creating the resume summary section
+        job_change_bool (bool): Should the summary section include the statement you are looking for a job change which is more customer-focused (e.g. Helpdesk Position)
 
     Returns:
         tuple: A tuple containing three elements:
@@ -167,11 +154,18 @@ def process_resume(resume, jd_string, comp_name_string, comp_info_string):
     with open(resume, "r", encoding="utf-8") as file:
         resume_string = file.read()
 
-    # create prompt
-    prompt = create_prompt(resume_string, jd_string, comp_name_string, comp_info_string)
+    # set job change boolean value based on radio button selection
+    if job_change == 'Yes':
+        job_change_bool:bool = True
+    else:
+        job_change_bool:bool = False
 
-    # get the .env values
-    load_dotenv()
+    # create prompt
+    prompt = create_prompt(resume_string, jd_string, comp_name_string, comp_info_string, job_change_bool)
+
+    # load the dotenv IPython extension and load the .env file
+    %load_ext dotenv
+    %dotenv
 
     # assign the ChatGPT api key
     my_api_key = os.getenv("API_KEY")
@@ -181,10 +175,10 @@ def process_resume(resume, jd_string, comp_name_string, comp_info_string):
     response_list = response_string.split("## Additional Suggestions")
     
     # extract new resume and suggestions for improvement
-    new_resume = response_list[0]
-    suggestions = "## Additional Suggestions \n\n" +response_list[1]
+    new_resume_sections = response_list[0]
+    suggestions = "## Additional Suggestions \n\n" + response_list[1]
 
-    return new_resume, new_resume, suggestions
+    return new_resume_sections, suggestions
 
 def export_resume(new_resume):
     """
