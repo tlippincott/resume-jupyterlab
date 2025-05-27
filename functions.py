@@ -3,6 +3,7 @@ import os
 import re
 import pathlib as Path
 from openai import OpenAI
+from dotenv import load_dotenv
 
 from markdown import markdown
 from weasyprint import HTML, CSS
@@ -163,9 +164,8 @@ def process_resume(resume, jd_string, comp_name_string, comp_info_string, job_ch
     # create prompt
     prompt = create_prompt(resume_string, jd_string, comp_name_string, comp_info_string, job_change_bool)
 
-    # load the dotenv IPython extension and load the .env file
-    %load_ext dotenv
-    %dotenv
+    # load the .env file
+    load_dotenv()
 
     # assign the ChatGPT api key
     my_api_key = os.getenv("API_KEY")
@@ -179,6 +179,25 @@ def process_resume(resume, jd_string, comp_name_string, comp_info_string, job_ch
     suggestions = "## Additional Suggestions \n\n" + response_list[1]
 
     return new_resume_sections, suggestions
+
+def save_edits(section_edits):
+    """
+    Save resume section edits as a Markdown file
+
+    Args:
+        section_edits (str): Final resume sections after any edits
+
+    Returns:
+        str: A message indicating the save was success/failure
+    """
+
+    try:
+        with open("resumes/resume_new.md", 'w') as f:
+            f.write(section_edits)
+
+        return "Edit section saved successfully!"
+    except Exception as e:
+        return f"Failed to save edits: {str(e)}"
 
 def export_resume(new_resume):
     """
