@@ -8,6 +8,9 @@ from dotenv import load_dotenv
 from markdown import markdown
 from weasyprint import HTML, CSS
 
+class RandomError(Exception):
+    pass
+
 def create_resume_prompt(resume_string: str, jd_string: str, comp_name_string: str, comp_info_string: str, job_change_bool: bool) -> str:
     """
     Creates a detailed prompt for AI-powered resume section optimization based on a job description, company name, and company information.
@@ -282,8 +285,14 @@ def process_cover_letter(bullet_points, jt_string, jd_string, comp_name_string, 
     Returns:
         - str: The body of the cover letter
     """
+    # separate the summary from the enhanced bullet points
+    try:
+        split_bullet_points()
+    except NotFoundError as e:
+        return "'resume_new.md' not split as expected"
+        
     # read enhanced bullet point file
-    with open(bullet_points, "r", encoding="utf-8") as file:
+    with open('resumes/enhanced_bullet_points.md', "r", encoding="utf-8") as file:
         bullet_point_string = file.read()
 
     # set job change boolean value based on radio button selection
@@ -305,6 +314,25 @@ def process_cover_letter(bullet_points, jt_string, jd_string, comp_name_string, 
     cover_letter_string = get_response(prompt, my_api_key)
     
     return cover_letter_string
+
+def split_bullet_points():
+    # read the file
+    with open('resumes/resume_new.md', 'r', encoding='utf-8') as f:
+        content = f.read()
+    
+    # split summary and bullet points
+    split_marker = '## spins ##'
+    sections = content.split(split_marker)
+    
+    if len(parts) > 1:
+        # include the split marker at the beginning of the second part
+        enhanced_bullet_points = split_marker + sections[1]
+    
+        # save the enhanced bullet points to a new file
+        with open('enhanced_bullet_points.md', 'w', encoding='utf-8') as f:
+            f.write(enhanced_bullet_points)
+    else:
+        raise RandomError("'resume_new.md' not split as expected")
 
 def save_edits(section_edits):
     """
