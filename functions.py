@@ -270,7 +270,7 @@ def process_resume(resume, jd_string, comp_name_string, comp_info_string, job_ch
 
     return new_resume_sections, suggestions
 
-def process_cover_letter(bullet_points, jt_string, jd_string, comp_name_string, comp_info_string, job_change):
+def process_cover_letter(jt_string, jd_string, comp_name_string, comp_info_string, job_change):
     """
     Process resume bullet points and job posting information in order to create the body of a cover letter.
 
