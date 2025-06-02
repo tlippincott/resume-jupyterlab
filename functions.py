@@ -31,6 +31,7 @@ def create_resume_prompt(resume_string: str, jd_string: str, comp_name_string: s
     Returns:
         str: A formatted prompt string containing instructions for resume optimization
     """
+    
     return f"""\
 You are a professional resume optimization expert specializing in tailoring resume bullet points and summaries to specific job descriptions. Your goal is to optimize my bullet points and provide actionable suggestions for improvement to align with the target role.
 
@@ -119,6 +120,7 @@ def create_cover_letter_prompt(bullet_point_string: str, jt_string: str, jd_stri
     Returns:
         str: A formatted prompt string containing instructions for creating the body of a cover letter
     """
+    
     return f"""\
 You are a professional cover letter expert specializing in tailoring cover letters to specific job postings. Your goal is to write a professional, concise, and effective body for a cover letter that aligns with the provided job opportunity.
 
@@ -208,6 +210,7 @@ def get_response(prompt: str, my_api_key: str, model: str = "gpt-4o-mini", tempe
     Raises:
         OpenAIError: If there's an issue with the API call
     """
+    
     # Setup API client
     client = OpenAI(api_key=my_api_key)
 
@@ -241,6 +244,7 @@ def process_resume(resume, jd_string, comp_name_string, comp_info_string, job_ch
             - str: The same optimized resume sections (for editing)
             - str: Suggestions for improving the resume
     """
+    
     # read resume
     with open(resume, "r", encoding="utf-8") as file:
         resume_string = file.read()
@@ -285,6 +289,7 @@ def process_cover_letter(jt_string, jd_string, comp_name_string, comp_info_strin
     Returns:
         - str: The body of the cover letter
     """
+    
     # separate the summary from the enhanced bullet points
     try:
         split_bullet_points()
@@ -342,7 +347,7 @@ def save_edits(section_edits):
         section_edits (str): Final resume sections after any edits
 
     Returns:
-        str: A message indicating the save was success/failure
+        str: A message indicating the save was a success/failure
     """
 
     try:
@@ -353,9 +358,28 @@ def save_edits(section_edits):
     except Exception as e:
         return f"Failed to save edits: {str(e)}"
 
+def save_cover_edits(cover_body_edits):
+    """
+    Save cover letter body edits as a Markdown file
+
+    Args:
+        cover_body_edits (str): Final cover letter body section after any edits
+
+    Returns:
+        str: A message indicating the save was a success/failure
+    """
+
+    try:
+        with open("resumes/cover_letter_new.md", 'w') as f:
+            f.write(cover_body_edits)
+
+        return "Cover letter edits saved successfully!"
+    except Exception as e:
+        return f"Failed to save edits: {str(e)}"
+
 def export_resume(new_resume):
     """
-    Convert a markdown resume to PDF format and save it.
+    Convert a markdown resume to PDF format and save it
 
     Args:
         new_resume (str): The resume content in markdown format
@@ -363,16 +387,42 @@ def export_resume(new_resume):
     Returns:
         str: A message indicating success or failure of the PDF export
     """
+    
     try:
         # save as PDF
         output_pdf_file = "resumes/resume_new.pdf"
         
-        # Convert Markdown to HTML
+        # convert Markdown to HTML
         html_content = markdown(new_resume)
         
-        # Convert HTML to PDF and save
+        # convert HTML to PDF and save
         HTML(string=html_content).write_pdf(output_pdf_file, stylesheets=['resumes/style.css'])
 
         return f"Successfully exported resume to {output_pdf_file}"
     except Exception as e:
         return f"Failed to export resume: {str(e)}"
+
+def export_cover_letter(new_cover_letter):
+    """
+    Convert a markdown cover letter to PDF format and save it
+
+    Args:
+        new_cover_letter (str): The cover letter content in markdown format
+
+    Returns:
+        str: A message indicating success or failure of the PDF export
+    """
+
+    try:
+        # save as PDF
+        output_cover_pdf_file = "resumes/cover_letter_new.pdf"
+
+        # convert Markdown to HTML
+        html_cover_content = markdown(new_cover_letter)
+
+        # convert HTML to PDF and save
+        HTML(string=html_cover_content).write_pdf(output_cover_pdf_file, stylesheets=['resumes/cover_style.css'])
+
+        return f"Successfully exported resume to {output_cover_pdf_file}"
+    except Exception as e:
+        return f"Failed to export cover letter: {str(e)}"
