@@ -313,7 +313,7 @@ def process_cover_letter(jt_string, jd_string, comp_name_string, comp_info_strin
     # generate response
     cover_letter_string = get_response(prompt, my_api_key)
     
-    return cover_letter_string
+    return cover_letter_string, "Successfully generated cover letter"
 
 def split_bullet_points():
     # read the file
