@@ -1,6 +1,7 @@
 # functions for resume optimization
 import os
 import re
+import shutil
 from openai import OpenAI
 from dotenv import load_dotenv
 
@@ -14,7 +15,8 @@ def strip_code_fence(text):
     # remove triple backtick fences (e.g., ```markdown)
     return re.sub(r'^```markdown\s*', '', text, flags=re.IGNORECASE)
 
-def show_pdf(pdf_path: str) -> str:
+def show_pdf(file_name: str) -> str:
+    pdf_path = os.path.join("resumes", file_name)
     if os.path.exists(pdf_path):
         return pdf_path
     else:
@@ -454,9 +456,9 @@ def export_resume():
         # convert HTML to PDF and save
         HTML(string=final_html_resume).write_pdf('resumes/Terry_Lippincott_Resume_2025.pdf', stylesheets=['resumes/resume_style.css'])
 
-        return f"Successfully exported resume 'Terry_Lippincott_Resume_2025.pdf'"
+        return f"Successfully generated resume 'Terry_Lippincott_Resume_2025.pdf'"
     except Exception as e:
-        return f"Failed to export resume: {str(e)}"
+        return f"Failed to generate resume: {str(e)}"
 
 def export_cover_letter(new_cover_letter):
     """
@@ -479,6 +481,29 @@ def export_cover_letter(new_cover_letter):
         # convert HTML to PDF and save
         HTML(string=html_cover_content).write_pdf(output_cover_pdf_file, stylesheets=['resumes/cover_style.css'])
 
-        return f"Successfully exported resume to {output_cover_pdf_file}"
+        return f"Successfully generated resume to {output_cover_pdf_file}"
     except Exception as e:
-        return f"Failed to export cover letter: {str(e)}"
+        return f"Failed to generate cover letter: {str(e)}"
+
+def move_to_downloads(file_name: str) -> str:
+    """
+    Move resume pdf and cover letter pdf to the Downloads folder
+
+    Args:
+        str: Name of file to be moved
+
+    Returns:
+        str: A message indicating the move was a success/failure
+    """
+
+    try:
+        downloads_dir = os.path.join(os.path.expanduser("~"), "Downloads")
+
+        # move resume pdf
+        source_file = os.path.join("resumes", file_name)
+        destination = os.path.join(downloads_dir, os.path.basename(source_file))
+        shutil.move(source_file, destination)
+
+        return f"{file_name} moved successfully!"
+    except Exception as e:
+        return f"Failed to move pdf files: {str(e)}"
