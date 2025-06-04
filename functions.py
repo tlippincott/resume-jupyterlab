@@ -14,6 +14,12 @@ def strip_code_fence(text):
     # remove triple backtick fences (e.g., ```markdown)
     return re.sub(r'^```markdown\s*', '', text, flags=re.IGNORECASE)
 
+def show_pdf(pdf_path: str) -> str:
+    if os.path.exists(pdf_path):
+        return pdf_path
+    else:
+        return 'resumes/pdf_not_found.pdf'
+
 def create_resume_prompt(resume_string: str, jd_string: str, comp_name_string: str, comp_info_string: str, job_change_bool: bool) -> str:
     """
     Creates a detailed prompt for AI-powered resume section optimization based on a job description, company name, and company information.
@@ -446,9 +452,9 @@ def export_resume():
         final_html_resume = construct_html(md_file, html_template_file, resume_sections)
         
         # convert HTML to PDF and save
-        HTML(string=final_html_resume).write_pdf('resumes/final_resume_output.pdf', stylesheets=['resumes/resume_style.css'])
+        HTML(string=final_html_resume).write_pdf('resumes/Terry_Lippincott_Resume_2025.pdf', stylesheets=['resumes/resume_style.css'])
 
-        return f"Successfully exported resume 'final_resume_output.pdf'"
+        return f"Successfully exported resume 'Terry_Lippincott_Resume_2025.pdf'"
     except Exception as e:
         return f"Failed to export resume: {str(e)}"
 
