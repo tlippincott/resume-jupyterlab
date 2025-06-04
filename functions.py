@@ -1,7 +1,6 @@
 # functions for resume optimization
 import os
 import re
-import pathlib as Path
 from openai import OpenAI
 from dotenv import load_dotenv
 
@@ -10,6 +9,10 @@ from weasyprint import HTML, CSS
 
 class RandomError(Exception):
     pass
+
+def strip_code_fence(text):
+    # remove triple backtick fences (e.g., ```markdown)
+    return re.sub(r'^```markdown\s*', '', text, flags=re.IGNORECASE)
 
 def create_resume_prompt(resume_string: str, jd_string: str, comp_name_string: str, comp_info_string: str, job_change_bool: bool) -> str:
     """
@@ -32,7 +35,7 @@ def create_resume_prompt(resume_string: str, jd_string: str, comp_name_string: s
         str: A formatted prompt string containing instructions for resume optimization
     """
     
-    return f"""\
+    return f'''\
 You are a professional resume optimization expert specializing in tailoring resume bullet points and summaries to specific job descriptions. Your goal is to optimize my bullet points and provide actionable suggestions for improvement to align with the target role.
 
 Enhance the provided resume bullet points to align with the given job description and create a tailored resume summary. The summary should leverage the enhanced bullet points, the company name, and company information while underscoring how my skills, including 15 years of experience in the technology sector, can benefit the company. The uploaded files will be `resume_string` (a string), `jd_string` (a string), `comp_name_string` (a string), `comp_info_string` (a string), and `job_change_bool` (a boolean).
@@ -65,41 +68,58 @@ Enhance the provided resume bullet points to align with the given job descriptio
 
 # Output Format
 
-- Enhanced bullet points that directly relate to the job description (`jd_string`).
-- Each bullet point begins with "<li>" and ends with "</li>" and only contains text in the middle.
 - A resume summary consisting of 6-8 sentences, incorporating my experience, skills, and alignment with the company’s objectives. If `job_change_bool` is "True", include an additional statement about seeking a more customer-focused role. Use information from `comp_name_string` , `comp_info_string`, and `job_change_bool`.
+- Enhanced bullet points for each heading (spins, programmer, analyst) that directly relate to the job description (`jd_string`).
+- Each bullet point begins with "<li>" and ends with "</li>" and only contains text in the middle.
 - Additional Suggestions section detailing actionable points on additional skills, certifications/courses, and project ideas/experiences.
-- Return the same updated markdown file as "enhanced-information.md". The file should have the same number of sections and enhanced bullet points, a summary, and additional suggestions placed under the correct headings. Ensure enhancements are made to the "spins", "programmer", and "analyst" sections with enhanced bullet points placed accordingly.
+- Return the same updated markdown file as "enhanced-information.md". The file should have a summary, the same number of sections and enhanced bullet points, and additional suggestions placed under the correct headings. Ensure enhancements are made to the "spins", "programmer", and "analyst" sections with enhanced bullet points placed accordingly.
 
 # Examples
 
 ## Input
-- **Resume Bullet Points:** 
-  - Developed applications using Agile methodologies.
-  - Managed a software development team.
+- **Resume In Markdown:**
+  - ## summary ##
+  - ## spins ##
+    - Developed applications using Agile methodologies.
+    - Managed a software development team.
+  - ## programmer ##
+    - Created SQL stored procedures for data pipelines.
+    - Was invlolved with every aspect of the software development lifecycle.
+  - ## analyst ##
+    - Investigated user issues and bugs.
+    - Created monthly and weekly data reports.
+  - ## Additional Suggestions
 - **Job Description:** Seeks project managers with experience in leading technology projects and optimizing team performance.
 - **Company Name:** TechVision
 - **Company Information:** TechVision is a leading innovator in cloud solutions and AI technologies.
 - **Job Change:** True
 
 ## Output
-- **Enhanced Bullet Points:**
-  <li>Successfully led cross-functional teams in developing key applications, utilizing Agile methodologies to enhance productivity and product quality.</li>
-  <li>Managed a high-performing software development team, achieving a 20% increase in project delivery efficiency</li>
+## summary ##
+With over 15 years in the technology industry, I have honed my ability to lead dynamic teams and drive innovation in fast-paced environments. My experience in managing technology projects aligns seamlessly with TechVision's aim to pioneer cloud solutions and AI advancements. By optimizing team performance and fostering collaboration, I have consistently delivered top-tier results. Additionally, I am seeking a role that is more customer-focused to leverage my strategic insights in enhancing client engagement. At TechVision, I plan to leverage these skills to spearhead projects that fuel growth and differentiation in the market. My strategic perspective and commitment to quality will support your mission of innovation. I am excited about the opportunity to contribute to TechVision's success and drive future achievements.
 
-- **Resume Summary:**
-  With over 15 years in the technology industry, I have honed my ability to lead dynamic teams and drive innovation in fast-paced environments. My experience in managing technology projects aligns seamlessly with TechVision's aim to pioneer cloud solutions and AI advancements. By optimizing team performance and fostering collaboration, I have consistently delivered top-tier results. Additionally, I am seeking a role that is more customer-focused to leverage my strategic insights in enhancing client engagement. At TechVision, I plan to leverage these skills to spearhead projects that fuel growth and differentiation in the market. My strategic perspective and commitment to quality will support your mission of innovation. I am excited about the opportunity to contribute to TechVision's success and drive future achievements.
+## spins ##
+<li>Successfully led cross-functional teams in developing key applications, utilizing Agile methodologies to enhance productivity and product quality.</li>
+<li>Managed a high-performing software development team, achieving a 20% increase in project delivery efficiency</li>
 
-- **Additional Suggestions:**
-  - **Additional Skills:** Leadership in collaborative project environments.
-  - **Certifications or Courses:** Agile Project Management Certification.
-  - **Project Ideas or Experiences:** Develop an AI-focused project that aligns with cloud services.
+## programmer ##
+<li>Created complex SQL stored procedures utilized in nightly batch processing</li>
+<li>Heavily involved in all aspects of the development lifecycle, from requirements gathering to user testing and training</li>
+
+## analyst ##
+<li>Was first line of contact for user issues, including installation problems and software bugs</li>
+<li>Created and automated complex monthly and weekly reports, allowing management to make decisions based on data analysis</li>
+
+## Additional Suggestions
+**Additional Skills:** Leadership in collaborative project environments.
+**Certifications or Courses:** Agile Project Management Certification.
+**Project Ideas or Experiences:** Develop an AI-focused project that aligns with cloud services.
 
 # Notes
 
 - Ensure that the enhanced bullet points and summary narrative maintain a formal and professional tone.
 - Customize the summary to reflect a strong understanding of the company’s mission and values.
-"""
+'''
 
 def create_cover_letter_prompt(bullet_point_string: str, jt_string: str, jd_string: str, comp_name_string: str, comp_info_string: str, job_change_bool: bool) -> str:
     """
@@ -121,7 +141,7 @@ def create_cover_letter_prompt(bullet_point_string: str, jt_string: str, jd_stri
         str: A formatted prompt string containing instructions for creating the body of a cover letter
     """
     
-    return f"""\
+    return f'''\
 You are a professional cover letter expert specializing in tailoring cover letters to specific job postings. Your goal is to write a professional, concise, and effective body for a cover letter that aligns with the provided job opportunity.
 
 The cover letter should leverage the resume bullet points, job title, company name, company information, and job description, while underscoring how my skills, including 15 years of experience in the technology sector, can benefit the company. If the 'job_change_bool' value is "True," also include a statement that I am looking for a role that is more customer-focused. The uploaded files will be Resume Bullet Points (a string), Job Title (a string), Company Name (a string), Company Information (a string), Job Description (a string), Customer Facing Role (a boolean).
@@ -156,6 +176,7 @@ Generate the cover letter as a markdown text file named "generated_cover_letter.
 - A structured body that logically presents my qualifications and connection to the job role.
 - A closing remark.
 - Contact information is not necessary.
+- The heading "** cover_letter_body **" and the remaining text underneath 
 
 # Notes
 
@@ -187,7 +208,7 @@ TechVision stands out to me because of their pioneering cloud solutions and AI a
 
 Thank you for considering my application. I look forward to the possibility of discussing how I can contribute to the success of TechVison.
 ```
-"""
+'''
     
 def get_response(prompt: str, my_api_key: str, model: str = "gpt-4o-mini", temperature: float = 0.7) -> str:
     """
@@ -272,7 +293,10 @@ def process_resume(resume, jd_string, comp_name_string, comp_info_string, job_ch
     new_resume_sections = response_list[0]
     suggestions = "## Additional Suggestions \n\n" + response_list[1]
 
-    return new_resume_sections, suggestions
+    # remove "```markdown" from returned file
+    clean_resume_sections = strip_code_fence(new_resume_sections)
+
+    return clean_resume_sections, suggestions
 
 def process_cover_letter(jt_string, jd_string, comp_name_string, comp_info_string, job_change):
     """
@@ -377,28 +401,54 @@ def save_cover_edits(cover_body_edits):
     except Exception as e:
         return f"Failed to save edits: {str(e)}"
 
-def export_resume(new_resume):
-    """
-    Convert a markdown resume to PDF format and save it
+def extract_section(sections, md_section_file):
+    result = {}
+    for section in sections:
+        # regex to match heading and capture text until next heading or end of file
+        pattern = rf'##\s*{section}\s*##\s*\n(.*?)(?=\n##|\Z)'
+        match = re.search(pattern, md_section_file, re.DOTALL | re.MULTILINE)
+        
+        if match:
+            extracted = match.group(1).strip()
+        else:
+            extracted = None
+        
+        result[section] = extracted
+    return result
 
-    Args:
-        new_resume (str): The resume content in markdown format
+def construct_html(md_file, html_template_file, md_file_sections):
+    # extract Markdown sections
+    with open(md_file, 'r', encoding='utf-8') as file:
+        md_section_file = file.read()
 
-    Returns:
-        str: A message indicating success or failure of the PDF export
+    md_sections = extract_section(md_file_sections, md_section_file)
+    
+    # get the HTML template file
+    with open(html_template_file, 'r', encoding='utf-8') as file:
+        html_template = file.read()
+
+    # insert the corresponding sections into the HTML template
+    final_html = html_template.format(**md_sections)
+
+    return final_html
+
+def export_resume():
     """
+    Save the enhanced resume as a PDF file
+    """
+
+    md_file = 'resumes/resume_new.md'
+    html_template_file = 'resumes/resume.html'
+    resume_sections = ('summary', 'spins', 'programmer', 'analyst')
     
     try:
-        # save as PDF
-        output_pdf_file = "resumes/resume_new.pdf"
-        
-        # convert Markdown to HTML
-        html_content = markdown(new_resume)
+        # create HTML file
+        final_html_resume = construct_html(md_file, html_template_file, resume_sections)
         
         # convert HTML to PDF and save
-        HTML(string=html_content).write_pdf(output_pdf_file, stylesheets=['resumes/style.css'])
+        HTML(string=final_html_resume).write_pdf('resumes/final_resume_output.pdf', stylesheets=['resumes/resume_style.css'])
 
-        return f"Successfully exported resume to {output_pdf_file}"
+        return f"Successfully exported resume 'final_resume_output.pdf'"
     except Exception as e:
         return f"Failed to export resume: {str(e)}"
 
