@@ -13,7 +13,7 @@ class RandomError(Exception):
 
 def strip_code_fence(text):
     # remove triple backtick fences (e.g., ```markdown)
-    return re.sub(r'^```markdown\s*', '', text, flags=re.IGNORECASE)
+    return re.sub(r'```\s*|markdown\s*', '', text, flags=re.IGNORECASE)
 
 def show_pdf(file_name: str) -> str:
     pdf_path = os.path.join("resumes", file_name)
@@ -152,7 +152,7 @@ def create_cover_letter_prompt(bullet_point_string: str, jt_string: str, jd_stri
     return f'''\
 You are a professional cover letter expert specializing in tailoring cover letters to specific job postings. Your goal is to write a professional, concise, and effective body for a cover letter that aligns with the provided job opportunity.
 
-The cover letter should leverage the resume bullet points, job title, company name, company information, and job description, while underscoring how my skills, including 15 years of experience in the technology sector, can benefit the company. If the 'job_change_bool' value is "True," also include a statement that I am looking for a role that is more customer-focused. The uploaded files will be Resume Bullet Points (a string), Job Title (a string), Company Name (a string), Company Information (a string), Job Description (a string), Customer Facing Role (a boolean).
+The cover letter should leverage the resume bullet points, job title, company name, company information, and job description, while underscoring how my skills, including 15 years of experience in the technology sector, can benefit the company. If the 'job_change_bool' value is "True," also include a statement that I am looking for a role that is more customer-focused. The uploaded files will be Resume Bullet Points (a string), Job Title (a string), Company Name (a string), Company Information (a string), Job Description (a string), Customer Facing Role (a boolean). The total word count of the cover letter should be 280-350 words.
 
 **Input:**
 - Resume Bullet Points: {bullet_point_string}
@@ -184,7 +184,8 @@ Generate the cover letter as a markdown text file named "generated_cover_letter.
 - A structured body that logically presents my qualifications and connection to the job role.
 - A closing remark.
 - Contact information is not necessary.
-- The heading "** cover_letter_body **" and the remaining text underneath 
+- The wording "## cover_letter_body ##" and the remaining text underneath, with each paragraph beinning with a "<p>" and ending with a "</p>".
+- The total word count should be 280-350 words.
 
 # Notes
 
@@ -205,17 +206,14 @@ Generate the cover letter as a markdown text file named "generated_cover_letter.
 - Customer Facing Role: True
 
 **Output:**
-(generated_cover_letter.md content)
+## cover_letter_body ##
+<p>I am writing to express my interest in the Help Desk Associate position at TechVision. With 15 years of experience in the technology field and proven success in customer assistance, I am excited about the opportunity to contribute to TechVision with my skills in software installation and setup, answering customer questions, and creating user manuals.</p>
 
-```
-I am writing to express my interest in the Help Desk Associate position at TechVision. With 15 years of experience in the technology field and proven success in customer assistance, I am excited about the opportunity to contribute to TechVision with my skills in software installation and setup, answering customer questions, and creating user manuals.
+<p>Throughout my career, I have been heavily involved in all aspects of the software development lifecycle. I am very comfortable bridging the gap between the technical and the non-technical.</p>
 
-Throughout my career, I have been heavily involved in all aspects of the software development lifecycle. I am very comfortable bridging the gap between the technical and the non-technical.
+<p>TechVision stands out to me because of their pioneering cloud solutions and AI advancements, and I am eager to bring my expertise in customer satisfaction to your esteemed company.</p>
 
-TechVision stands out to me because of their pioneering cloud solutions and AI advancements, and I am eager to bring my expertise in customer satisfaction to your esteemed company. 
-
-Thank you for considering my application. I look forward to the possibility of discussing how I can contribute to the success of TechVison.
-```
+<p>Thank you for considering my application. I look forward to the possibility of discussing how I can contribute to the success of TechVison.</p>
 '''
     
 def get_response(prompt: str, my_api_key: str, model: str = "gpt-4o-mini", temperature: float = 0.7) -> str:
@@ -306,6 +304,25 @@ def process_resume(resume, jd_string, comp_name_string, comp_info_string, job_ch
 
     return clean_resume_sections, suggestions
 
+def split_bullet_points():
+    # read the file
+    with open('resumes/resume_new.md', 'r', encoding='utf-8') as f:
+        content = f.read()
+    
+    # split summary and bullet points
+    split_marker = '## spins ##'
+    sections = content.split(split_marker)
+    
+    if len(sections) > 1:
+        # include the split marker at the beginning of the second part
+        enhanced_bullet_points = split_marker + sections[1]
+    
+        # save the enhanced bullet points to a new file
+        with open('resumes/enhanced_bullet_points.md', 'w', encoding='utf-8') as f:
+            f.write(enhanced_bullet_points)
+    else:
+        raise RandomError("'resume_new.md' not split as expected")
+
 def process_cover_letter(jt_string, jd_string, comp_name_string, comp_info_string, job_change):
     """
     Process resume bullet points and job posting information in order to create the body of a cover letter.
@@ -349,27 +366,11 @@ def process_cover_letter(jt_string, jd_string, comp_name_string, comp_info_strin
 
     # generate response
     cover_letter_string = get_response(prompt, my_api_key)
-    
-    return cover_letter_string, "Successfully generated cover letter"
 
-def split_bullet_points():
-    # read the file
-    with open('resumes/resume_new.md', 'r', encoding='utf-8') as f:
-        content = f.read()
-    
-    # split summary and bullet points
-    split_marker = '## spins ##'
-    sections = content.split(split_marker)
-    
-    if len(parts) > 1:
-        # include the split marker at the beginning of the second part
-        enhanced_bullet_points = split_marker + sections[1]
-    
-        # save the enhanced bullet points to a new file
-        with open('enhanced_bullet_points.md', 'w', encoding='utf-8') as f:
-            f.write(enhanced_bullet_points)
-    else:
-        raise RandomError("'resume_new.md' not split as expected")
+    # remove "```" from returned file
+    clean_cover_letter_body = strip_code_fence(cover_letter_string)
+
+    return clean_cover_letter_body, "Successfully generated cover letter"
 
 def save_edits(section_edits):
     """
@@ -460,28 +461,23 @@ def export_resume():
     except Exception as e:
         return f"Failed to generate resume: {str(e)}"
 
-def export_cover_letter(new_cover_letter):
+def export_cover_letter():
     """
-    Convert a markdown cover letter to PDF format and save it
-
-    Args:
-        new_cover_letter (str): The cover letter content in markdown format
-
-    Returns:
-        str: A message indicating success or failure of the PDF export
+    Save the cover letter as a PDF file
     """
 
+    md_file = 'resumes/cover_letter_new.md'
+    html_template_file = 'resumes/cover_letter.html'
+    cover_letter_sections = ('cover_letter_body',)
+    
     try:
-        # save as PDF
-        output_cover_pdf_file = "resumes/cover_letter_new.pdf"
-
-        # convert Markdown to HTML
-        html_cover_content = markdown(new_cover_letter)
-
+        # create HTML file
+        final_html_cover_letter = construct_html(md_file, html_template_file, cover_letter_sections)
+        
         # convert HTML to PDF and save
-        HTML(string=html_cover_content).write_pdf(output_cover_pdf_file, stylesheets=['resumes/cover_style.css'])
+        HTML(string=final_html_cover_letter).write_pdf('resumes/Terry_Lippincott_Cover_2025.pdf', stylesheets=['resumes/cover_style.css'])
 
-        return f"Successfully generated resume to {output_cover_pdf_file}"
+        return f"Successfully generated cover letter 'Terry_Lippincott_Cover_2025.pdf'"
     except Exception as e:
         return f"Failed to generate cover letter: {str(e)}"
 

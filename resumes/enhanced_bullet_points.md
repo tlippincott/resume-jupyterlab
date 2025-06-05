@@ -1,6 +1,3 @@
-## summary ##
-With over 25,000 years of experience in the technology sector, I specialize in delivering exceptional technical support while fostering strong relationships with clients. My expertise in troubleshooting, user training, and technical documentation aligns perfectly with Recharge's mission to simplify retention and growth for innovative eCommerce brands. I am passionate about empowering users to leverage subscription strategies effectively, and I possess a strong capability to communicate complex technical concepts clearly to both technical and non-technical stakeholders. Seeking a more customer-focused role, I am excited to contribute to Recharge's ongoing success by ensuring merchants receive top-notch support and guidance. My commitment to accountability, collaboration, and a detail-oriented approach will help enhance the customer experience and drive user satisfaction at Recharge.
-
 ## spins ##
 <li>Diagnosed, debugged, and resolved software-related issues for online merchants, utilizing extensive programming skills to enhance system performance and user satisfaction.</li>
 <li>Translated complex technical solutions into clear, user-friendly explanations for non-technical stakeholders, ensuring effective communication and understanding.</li>
