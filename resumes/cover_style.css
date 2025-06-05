@@ -16,11 +16,12 @@ body {
 .three-columns {
   display: flex;
   justify-content: space-between;
+  margin: 0px 0px 50px 0px;
 }
 
 .column {
   flex: 1;
-  padding: 20px;
+  padding: 0px;
 }
 
 .contact {
@@ -29,6 +30,7 @@ body {
 
 .contact-align {
   text-align: right;
+  padding: 0px 5px 0px 5px;
 }
 
 /* Page Margins */

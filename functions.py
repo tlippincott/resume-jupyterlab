@@ -58,7 +58,7 @@ Enhance the provided resume bullet points to align with the given job descriptio
 3. **Write Resume Summary:**
    - Begin with a brief introduction summarizing my experience in the technology world.
    - Highlight how specific skills and achievements align with the company's goals.
-   - If the job change value (`job_change_bool`) is "True", include a statement about seeking a more customer-focused role.
+   - If the Customer Facing Role value (`job_change_bool`) is "True", include a statement about seeking a more customer-focused role. If the Customer Facing Role value (`job_change_bool`) is not "True", do not include a statement about seeking a more customer-focused role.
    - Conclude with the value I can bring to the company.
 
 # Additional Suggestions
@@ -76,7 +76,7 @@ Enhance the provided resume bullet points to align with the given job descriptio
 
 # Output Format
 
-- A resume summary consisting of 6-8 sentences, incorporating my experience, skills, and alignment with the company’s objectives. If `job_change_bool` is "True", include an additional statement about seeking a more customer-focused role. Use information from `comp_name_string` , `comp_info_string`, and `job_change_bool`.
+- A resume summary consisting of 6-8 sentences, incorporating my experience, skills, and alignment with the company’s objectives. If the Customer Facing Role value (`job_change_bool`) is "True", include a statement about seeking a more customer-focused role. If the Customer Facing Role value (`job_change_bool`) is not "True", do not include a statement about seeking a more customer-focused role. Use information from `comp_name_string` , `comp_info_string`, and `job_change_bool`.
 - Enhanced bullet points for each heading (spins, programmer, analyst) that directly relate to the job description (`jd_string`).
 - Each bullet point begins with "<li>" and ends with "</li>" and only contains text in the middle.
 - Additional Suggestions section detailing actionable points on additional skills, certifications/courses, and project ideas/experiences.
@@ -302,6 +302,10 @@ def process_resume(resume, jd_string, comp_name_string, comp_info_string, job_ch
     # remove "```markdown" from returned file
     clean_resume_sections = strip_code_fence(new_resume_sections)
 
+    # save the clean resume sections
+    with open("resumes/resume_new.md", 'w') as f:
+        f.write(clean_resume_sections)
+
     return clean_resume_sections, suggestions
 
 def split_bullet_points():
@@ -369,6 +373,10 @@ def process_cover_letter(jt_string, jd_string, comp_name_string, comp_info_strin
 
     # remove "```" from returned file
     clean_cover_letter_body = strip_code_fence(cover_letter_string)
+
+    # save the clean resume sections
+    with open("resumes/cover_letter_new.md", 'w') as f:
+        f.write(clean_cover_letter_body)
 
     return clean_cover_letter_body, "Successfully generated cover letter"
 
