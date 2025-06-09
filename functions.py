@@ -2,8 +2,10 @@
 import os
 import re
 import shutil
+import csv
 from openai import OpenAI
 from dotenv import load_dotenv
+from datetime import datetime
 
 from markdown import markdown
 from weasyprint import HTML, CSS
@@ -511,3 +513,23 @@ def move_to_downloads(file_name: str) -> str:
         return f"{file_name} moved successfully!"
     except Exception as e:
         return f"Failed to move pdf files: {str(e)}"
+  
+def save_to_csv_file(company_name: str, job_title: str, job_posting_site: str):
+    job_posting = "/Career/JobPostings/" + company_name + " " + job_title + ".txt"
+    
+    now = datetime.today()
+    today = f"{now.month}/{now.day}/{now.year}"
+    
+    new_row = ["Waiting", company_name, job_title, job_posting, today, "Yes", today, job_posting_site]
+
+    file_location = os.path.join(os.path.expanduser("~"), "Desktop/excel_import.csv")
+
+    try:
+        # write to CSV
+        with open(file_location, mode='a', newline='', encoding='utf-8') as f:
+            writer = csv.writer(f)
+            writer.writerow(new_row)
+
+        return "Row added successfully!"
+    except Exception as e:
+        return f"Failed to add row to csv file: {str(e)}"
