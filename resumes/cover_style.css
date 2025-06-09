@@ -1,10 +1,12 @@
+@import url('https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap');
+
 /* Global styling */
 body {
-    font-family: 'Gill Sans MT', Calibri, sans-serif;
-    font-size: 11px;
-    line-height: 1.4;
-    color: #333;
-    margin: 20px;
+  font-family: 'Gill Sans MT', Calibri, sans-serif;
+  font-size: 11px;
+  line-height: 1.696;
+  color: #333;
+  margin: 20px;
 }
 
 /* Header Styling */
@@ -16,7 +18,9 @@ body {
 .three-columns {
   display: flex;
   justify-content: space-between;
+  padding: 25px 0px 25px 5px;
   margin: 0px 0px 50px 0px;
+  background-color: #f5f5f5;
 }
 
 .column {
@@ -33,7 +37,15 @@ body {
   padding: 0px 5px 0px 5px;
 }
 
+.great-vibes-regular {
+  font-family: "Great Vibes", cursive;
+  font-weight: 400;
+  font-style: normal;
+  font-size: 32px;
+}
+
 /* Page Margins */
 @page {
-    margin: .5in;
+  size: 8.5in 11in;
+  margin: .5in;
 }
