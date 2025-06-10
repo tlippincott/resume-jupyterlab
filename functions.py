@@ -514,8 +514,8 @@ def move_to_downloads(file_name: str) -> str:
     except Exception as e:
         return f"Failed to move pdf files: {str(e)}"
   
-def save_to_csv_file(company_name: str, job_title: str, job_posting_site: str):
-    job_posting = "/Career/JobPostings/" + company_name + " " + job_title + ".txt"
+def save_job_posting_info(company_name: str, job_title: str, job_posting_site: str):
+    job_posting = "Career/JobPostings/" + company_name + " " + job_title + ".txt"
     
     now = datetime.today()
     today = f"{now.month}/{now.day}/{now.year}"
@@ -525,11 +525,21 @@ def save_to_csv_file(company_name: str, job_title: str, job_posting_site: str):
     file_location = os.path.join(os.path.expanduser("~"), "Desktop/excel_import.csv")
 
     try:
-        # write to CSV
+        # write job posting details to CSV
         with open(file_location, mode='a', newline='', encoding='utf-8') as f:
             writer = csv.writer(f)
             writer.writerow(new_row)
 
-        return "Row added successfully!"
+        # save the text of the screen shot; first define the paths
+        downloads_folder = os.path.expanduser("~/Downloads")
+        source_file = os.path.join(downloads_folder, "web_page_text.txt")
+        
+        destination_folder = os.path.expanduser("~")
+        destination_file = os.path.join(destination_folder, job_posting)
+        
+        # move and rename the file
+        shutil.move(source_file, destination_file)
+
+        return "Job posting information added successfully!"
     except Exception as e:
-        return f"Failed to add row to csv file: {str(e)}"
+        return f"Failed to add job posting information: {str(e)}"
