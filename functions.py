@@ -2,9 +2,10 @@
 import os
 import re
 import shutil
-import csv
+import urllib.parse
 from openai import OpenAI
 from dotenv import load_dotenv
+from openpyxl import load_workbook
 from datetime import datetime
 
 from markdown import markdown
@@ -515,31 +516,53 @@ def move_to_downloads(file_name: str) -> str:
         return f"Failed to move pdf files: {str(e)}"
   
 def save_job_posting_info(company_name: str, job_title: str, job_posting_site: str):
-    job_posting = "Career/JobPostings/" + company_name + " " + job_title + ".txt"
-    
-    now = datetime.today()
-    today = f"{now.month}/{now.day}/{now.year}"
-    
-    new_row = ["Waiting", company_name, job_title, job_posting, today, "Yes", today, job_posting_site]
+    # define file name
+    file_name = company_name + " " + job_title + ".txt"
 
-    file_location = os.path.join(os.path.expanduser("~"), "Desktop/excel_import.csv")
+    # construct file path for saving/moving job posting text file
+    destination_folder = os.path.join(os.path.expanduser("~"), "Career/JobPostings")
+    destination_file = os.path.join(destination_folder, file_name)
+
+    # create unencoded file_name for filesystem
+    # encode only for the hyperlink
+    encoded_file_name = urllib.parse.quote(file_name)
+    link_file_url = f"file://{destination_folder}/{encoded_file_name}"
+
+    # Excel hyperlink
+    excel_job_text_link = f'=HYPERLINK("{link_file_url}", "{file_name}")'
+
+    # timestamp
+    today = datetime.today().strftime("%m/%d/%Y")
+
+    # job posting data to append to Excel worksheet
+    #new_row = ["Waiting", company_name, job_title, excel_job_text_link, today, "Yes", today, job_posting_site]
+    new_row = ["Waiting", company_name, job_title, excel_job_text_link, today, "Yes", today, job_posting_site]
+
+    # Excel file path
+    excel_file_path = os.path.join(os.path.expanduser("~"), "Desktop", "Job_Search_Tracker.xlsm")
 
     try:
-        # write job posting details to CSV
-        with open(file_location, mode='a', newline='', encoding='utf-8') as f:
-            writer = csv.writer(f)
-            writer.writerow(new_row)
-
-        # save the text of the screen shot; first define the paths
+        if os.path.exists(excel_file_path):
+            wb = load_workbook(excel_file_path, keep_vba=True)
+            ws = wb["My Progress"]
+    
+            # find first blank row in column A
+            row_num = 1
+            while ws[f"A{row_num}"].value is not None:
+                row_num += 1
+    
+            # write row
+            for col_index, value in enumerate(new_row, start=1):
+                ws.cell(row=row_num, column=col_index, value=value)
+    
+            wb.save(excel_file_path)
+    
+        # move and rename the job posting text file
         downloads_folder = os.path.expanduser("~/Downloads")
         source_file = os.path.join(downloads_folder, "web_page_text.txt")
-        
-        destination_folder = os.path.expanduser("~")
-        destination_file = os.path.join(destination_folder, job_posting)
-        
-        # move and rename the file
         shutil.move(source_file, destination_file)
 
         return "Job posting information added successfully!"
+    
     except Exception as e:
         return f"Failed to add job posting information: {str(e)}"
