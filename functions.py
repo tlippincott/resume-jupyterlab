@@ -520,13 +520,11 @@ def save_job_posting_info(company_name: str, job_title: str, job_posting_site: s
     file_name = company_name + " " + job_title + ".txt"
 
     # construct file path for saving/moving job posting text file
-    destination_folder = os.path.join(os.path.expanduser("~"), "Career/JobPostings")
+    destination_folder = os.path.join(os.path.expanduser("~"), "Library/Group Containers/UBF8T346G9.Office")
     destination_file = os.path.join(destination_folder, file_name)
 
-    # create unencoded file_name for filesystem
-    # encode only for the hyperlink
-    encoded_file_name = urllib.parse.quote(file_name)
-    link_file_url = f"file://{destination_folder}/{encoded_file_name}"
+    # job posting text file location
+    link_file_url = f"file://{destination_file}"
 
     # Excel hyperlink
     excel_job_text_link = f'=HYPERLINK("{link_file_url}", "{file_name}")'
@@ -535,7 +533,6 @@ def save_job_posting_info(company_name: str, job_title: str, job_posting_site: s
     today = datetime.today().strftime("%m/%d/%Y")
 
     # job posting data to append to Excel worksheet
-    #new_row = ["Waiting", company_name, job_title, excel_job_text_link, today, "Yes", today, job_posting_site]
     new_row = ["Waiting", company_name, job_title, excel_job_text_link, today, "Yes", today, job_posting_site]
 
     # Excel file path
