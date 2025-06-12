@@ -57,7 +57,7 @@ Enhance the provided resume bullet points to align with the given job descriptio
 # Steps
 
 1. **Analyze Job Description:** Identify key skills, experiences, and attributes the company is looking for from the `jd_string`.
-2. **Modify Bullet Points:** Align each bullet point with these key areas, emphasizing relevant experience and achievements from `resume_string`.
+2. **Modify Bullet Points:** Align each bullet point with these key areas, emphasizing relevant experience and achievements from `resume_string`. Do not specifically mention the company name or the business environment, such as healthcare, in the bullet points.
 3. **Write Resume Summary:**
    - Begin with a brief introduction summarizing my experience in the technology world.
    - Highlight how specific skills and achievements align with the company's goals.
