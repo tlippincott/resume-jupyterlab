@@ -49,18 +49,18 @@ def create_resume_prompt(resume_string: str, jd_string: str, comp_name_string: s
     return f'''\
 You are a professional resume optimization expert specializing in tailoring resume bullet points and summaries to specific job descriptions. Your goal is to optimize my bullet points and provide actionable suggestions for improvement to align with the target role.
 
-Enhance the provided resume bullet points to align with the given job description and create a tailored resume summary. The summary should leverage the enhanced bullet points, the company name, and company information while underscoring how my skills, including 15 years of experience in the technology sector, can benefit the company. The uploaded files will be `resume_string` (a string), `jd_string` (a string), `comp_name_string` (a string), `comp_info_string` (a string), and `job_change_bool` (a boolean).
+Enhance the provided resume bullet points to align with the given job description and create a tailored resume summary. The summary should leverage the enhanced bullet points,  while underscoring how my skills, including 15 years of experience in the technology sector, can benefit the company. The uploaded files will be `resume_string` (a string), `jd_string` (a string), `comp_name_string` (a string), `comp_info_string` (a string), and `job_change_bool` (a boolean).
 
 - Incorporate details from the job description (`jd_string`) to refine the bullet points, ensuring they highlight relevant skills and experiences.
-- Craft a resume summary that emphasizes my alignment with the company’s needs and objectives, using the company name (`comp_name_string`) and company information (`comp_info_string`) effectively.
+- Craft a resume summary that emphasizes my alignment with the company’s needs and objectives, using the enhanced bullet points effectively.
 
 # Steps
 
 1. **Analyze Job Description:** Identify key skills, experiences, and attributes the company is looking for from the `jd_string`.
-2. **Modify Bullet Points:** Align each bullet point with these key areas, emphasizing relevant experience and achievements from `resume_string`. Do not specifically mention the company name or the business environment, such as healthcare, in the bullet points.
+2. **Modify Bullet Points:** Align each bullet point with these key areas, emphasizing relevant experience and achievements from `resume_string`. Use the Action + Project/Problem + Result format. Do not specifically mention the company name or the business environment, such as healthcare, in the bullet points. 
 3. **Write Resume Summary:**
    - Begin with a brief introduction summarizing my experience in the technology world.
-   - Highlight how specific skills and achievements align with the company's goals.
+   - Highlight how specific skills and achievements can benefit the company.
    - If the Customer Facing Role value (`job_change_bool`) is "True", include a statement about seeking a more customer-focused role. If the Customer Facing Role value (`job_change_bool`) is not "True", do not include a statement about seeking a more customer-focused role.
    - Conclude with the value I can bring to the company.
 
@@ -81,6 +81,7 @@ Enhance the provided resume bullet points to align with the given job descriptio
 
 - A resume summary consisting of 6-8 sentences, incorporating my experience, skills, and alignment with the company’s objectives. If the Customer Facing Role value (`job_change_bool`) is "True", include a statement about seeking a more customer-focused role. If the Customer Facing Role value (`job_change_bool`) is not "True", do not include a statement about seeking a more customer-focused role. Use information from `comp_name_string` , `comp_info_string`, and `job_change_bool`.
 - Enhanced bullet points for each heading (spins, programmer, analyst) that directly relate to the job description (`jd_string`).
+- Bullet points should follow the Action + Project/Problem + Result format.
 - Each bullet point begins with "<li>" and ends with "</li>" and only contains text in the middle.
 - Additional Suggestions section detailing actionable points on additional skills, certifications/courses, and project ideas/experiences.
 - Return the same updated markdown file as "enhanced-information.md". The file should have a summary, the same number of sections and enhanced bullet points, and additional suggestions placed under the correct headings. Ensure enhancements are made to the "spins", "programmer", and "analyst" sections with enhanced bullet points placed accordingly.
@@ -107,7 +108,7 @@ Enhance the provided resume bullet points to align with the given job descriptio
 
 ## Output
 ## summary ##
-With over 15 years in the technology industry, I have honed my ability to lead dynamic teams and drive innovation in fast-paced environments. My experience in managing technology projects aligns seamlessly with TechVision's aim to pioneer cloud solutions and AI advancements. By optimizing team performance and fostering collaboration, I have consistently delivered top-tier results. Additionally, I am seeking a role that is more customer-focused to leverage my strategic insights in enhancing client engagement. At TechVision, I plan to leverage these skills to spearhead projects that fuel growth and differentiation in the market. My strategic perspective and commitment to quality will support your mission of innovation. I am excited about the opportunity to contribute to TechVision's success and drive future achievements.
+With over 15 years in the technology industry, I have honed my ability to lead dynamic teams and drive innovation in fast-paced environments. My experience in managing technology projects provides me the skills to create cloud solutions and AI advancements. By optimizing team performance and fostering collaboration, I have consistently delivered top-tier results. Additionally, I am seeking a role that is more customer-focused to leverage my strategic insights in enhancing client engagement. I plan to leverage these skills to spearhead projects that fuel growth and differentiation in the market. My strategic perspective and commitment to quality enhances my innovative abilities. I am excited about the opportunity to contribute to the continued success and drive future achievements.
 
 ## spins ##
 <li>Successfully led cross-functional teams in developing key applications, utilizing Agile methodologies to enhance productivity and product quality.</li>
@@ -155,7 +156,7 @@ def create_cover_letter_prompt(bullet_point_string: str, jt_string: str, jd_stri
     return f'''\
 You are a professional cover letter expert specializing in tailoring cover letters to specific job postings. Your goal is to write a professional, concise, and effective body for a cover letter that aligns with the provided job opportunity.
 
-The cover letter should leverage the resume bullet points, job title, company name, company information, and job description, while underscoring how my skills, including 15 years of experience in the technology sector, can benefit the company. If the 'job_change_bool' value is "True," also include a statement that I am looking for a role that is more customer-focused. The uploaded files will be Resume Bullet Points (a string), Job Title (a string), Company Name (a string), Company Information (a string), Job Description (a string), Customer Facing Role (a boolean). The total word count of the cover letter should be 280-350 words.
+The cover letter should leverage the resume bullet points and job description, while underscoring how my skills, including 15 years of experience in the technology sector, can benefit the company. The very first sentence should include the job title and the company name. If the 'job_change_bool' value is "True," also include a statement that I am looking for a role that is more customer-focused. The uploaded files will be Resume Bullet Points (a string), Job Title (a string), Company Name (a string), Company Information (a string), Job Description (a string), Customer Facing Role (a boolean). The total word count of the cover letter should be 300-350 words.
 
 **Input:**
 - Resume Bullet Points: {bullet_point_string}
@@ -175,7 +176,8 @@ The cover letter should leverage the resume bullet points, job title, company na
 2. **Draft the Cover Letter**
    - Clearly state the job title and company I am applying to in the opening sentence.
    - Use the provided resume bullet points to highlight my relevant experience and achievements.
-   - Incorporate company-specific information and align my skills with what the company is seeking based on the job description.
+   - Do not include percentages anywhere in the cover letter.
+   - Align my skills with what the company is seeking based on the job description.
    - Conclude with a strong closing paragraph expressing enthusiasm and inviting further communication.
    
 3. **Ensure the content is concise, well-structured, and free of errors.**
@@ -188,13 +190,13 @@ Generate the cover letter as a markdown text file named "generated_cover_letter.
 - A closing remark.
 - Contact information is not necessary.
 - The wording "## cover_letter_body ##" and the remaining text underneath, with each paragraph beinning with a "<p>" and ending with a "</p>".
-- The total word count should be 280-350 words.
+- The total word count should be 300-350 words.
 
 # Notes
 
 - Focus on creating a positive tone and demonstrating value to the company.
-- Tailor the language and examples based on the job description and company context provided.
-- Avoid generic statements; personalize content to the role and company.
+- Tailor the language and examples based on the job description provided.
+- Avoid generic statements; personalize content to the role and company without specifically using the company name, except in the opening sentence.
 
 # Example 
 
@@ -210,13 +212,13 @@ Generate the cover letter as a markdown text file named "generated_cover_letter.
 
 **Output:**
 ## cover_letter_body ##
-<p>I am writing to express my interest in the Help Desk Associate position at TechVision. With 15 years of experience in the technology field and proven success in customer assistance, I am excited about the opportunity to contribute to TechVision with my skills in software installation and setup, answering customer questions, and creating user manuals.</p>
+<p>I am writing to express my interest in the Help Desk Associate position at TechVision. With 15 years of experience in the technology field and proven success in customer assistance, I am excited about the opportunity to contribute my skills and knowledge in software installation and setup, answering customer questions, and creating user manuals.</p>
 
 <p>Throughout my career, I have been heavily involved in all aspects of the software development lifecycle. I am very comfortable bridging the gap between the technical and the non-technical.</p>
 
-<p>TechVision stands out to me because of their pioneering cloud solutions and AI advancements, and I am eager to bring my expertise in customer satisfaction to your esteemed company.</p>
+<p>The commitment to innovation, particularly in cloud technologies and AI, aligns strongly with my own professional interests and aspirations. I am eager to bring my expertise in customer satisfaction to your esteemed company.</p>
 
-<p>Thank you for considering my application. I look forward to the possibility of discussing how I can contribute to the success of TechVison.</p>
+<p>Thank you for considering my application. I look forward to the possibility of discussing how I can contribute to the success and advancement of your organization.</p>
 '''
     
 def get_response(prompt: str, my_api_key: str, model: str = "gpt-4o-mini", temperature: float = 0.7) -> str:
